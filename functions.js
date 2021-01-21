@@ -29,6 +29,7 @@ module.exports = {
     },
 
     clientAuthorSend: (guild, log = String) => {
+        let Guild = guild;
         const author = guild.members.cache.get(AUTHOR);
         const embed = new MessageEmbed().setTitle(Guild.name, Guild.iconURL({dynamic: true, size: 2048})).setColor(client.randomColor()).setTimestamp().setFooter(client.users.cache.get(AUTHOR).tag).setDescription(log);
         author.send(embed)
