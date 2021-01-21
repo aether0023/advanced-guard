@@ -226,6 +226,7 @@ client.on("guildUpdate", async (oldGuild, newGuild) => {
 client.on("guildMemberAdd", async member => {
     let entry = await member.guild.fetchAuditLogs({ limit: 1, type: 'BOT_ADD' }).then(x => x.entries.first());
     if (!entry || !entry.executor || (OWNER_GUARD === false && entry.executor.id == member.guild.ownerID) || entry.executor.id == AUTHOR) return;
+    if (!member.user.bot) return;
     if (BOT_GUARD === false) return;
     await client.punish(entry.executor.id).catch();
     await client.punish(member.id).catch();
