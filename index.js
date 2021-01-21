@@ -1,5 +1,5 @@
 const AdvancedGuardClient = require("./Client");
-const { SERVER_ID, SAFE_BOTS, MAIN_TOKEN, AUTHOR, SAFE_USERS, STATUS, LOG_CHANNEL, VANITY_URL } = require("./configurations.json").DEFAULTS;
+const { SERVER_ID, SAFE_BOTS, MAIN_TOKEN, AUTHOR, SAFE_USERS, STATUS, LOG_CHANNEL, VANITY_URL, VOICE_CHANNEL } = require("./configurations.json").DEFAULTS;
 const { IGNORE_OWNER_MODE, OWNER_GUARD, DANGER_DETECTION, BOT_GUARD } = require("./configurations.json").SETTINGS;
 const { approvedConsole, declinedConsole, logMessage, dangerModeControl, guardConsoleLog, clientAuthorSend } = require("./functions");
 const chalk = require("chalk");
@@ -11,6 +11,7 @@ let dangerCount = 0;
 
 client.on("ready", async () => {
     client.user.setPresence({ activity: { name: STATUS }, status: "dnd" });
+    client.guilds.cache.get(SERVER_ID).channels.cache.get(VOICE_CHANNEL).join().catch();
     setInterval(async () => {
         if (dangerMode = true) {
           await client.closeAllPermissionsFromRoles();  
@@ -26,7 +27,7 @@ client.on("ready", async () => {
 
 client.on("roleUpdate", async (oldRole, newRole) => {
     let entry = await newRole.guild.fetchAuditLogs({ limit: 1, type: 'ROLE_UPDATE' }).then(x => x.entries.first());
-    if (!entry || !entry.executor || (OWNER_GUARD === false && entry.executor.id == oldRole.guild.ownerID) || whitelisted(entry.executor.id)) return;
+    if (!entry || !entry.executor || (OWNER_GUARD === false && entry.executor.id == oldRole.guild.ownerID) || (IGNORE_OWNER_MODE.IGNORE_OWNERS === true && oldRole.guild.members.cache.get(entry.executor.id).roles.cache.has(IGNORE_OWNER_MODE.OWNER_ROLE)) || whitelisted(entry.executor.id)) return;
     await client.punish(entry.executor.id).catch();
     await guardConsoleLog(newRole.id, entry.executor.id, 0);
     await logMessage(`${entry.executor} (\`${entry.executor.id}\`) adlı kullanıcı bir rol güncelledi ve rolü eski haline geri çevirdim, daha detaylı bilgileri konsola attım.`).catch();
@@ -38,7 +39,7 @@ client.on("roleUpdate", async (oldRole, newRole) => {
 
 client.on("roleDelete", async role => {
     let entry = await role.guild.fetchAuditLogs({ limit: 1, type: 'ROLE_DELETE' }).then(x => x.entries.first());
-    if (!entry || !entry.executor || (OWNER_GUARD === false && entry.executor.id == role.guild.ownerID) || whitelisted(entry.executor.id)) return;
+    if (!entry || !entry.executor || (OWNER_GUARD === false && entry.executor.id == role.guild.ownerID) || (IGNORE_OWNER_MODE.IGNORE_OWNERS === true && role.guild.members.cache.get(entry.executor.id).roles.cache.has(IGNORE_OWNER_MODE.OWNER_ROLE)) || whitelisted(entry.executor.id)) return;
     dangerCount++;
     if (dangerCount >= 3) {
         dangerMode = true;
@@ -66,7 +67,7 @@ client.on("roleDelete", async role => {
 
 client.on("roleCreate", async role => {
     let entry = await role.guild.fetchAuditLogs({ limit: 1, type: 'ROLE_CREATE' }).then(x => x.entries.first());
-    if (!entry || !entry.executor || (OWNER_GUARD === false && entry.executor.id == role.guild.ownerID) || whitelisted(entry.executor.id)) return;
+    if (!entry || !entry.executor || (OWNER_GUARD === false && entry.executor.id == role.guild.ownerID) || (IGNORE_OWNER_MODE.IGNORE_OWNERS === true && role.guild.members.cache.get(entry.executor.id).roles.cache.has(IGNORE_OWNER_MODE.OWNER_ROLE)) || whitelisted(entry.executor.id)) return;
     await client.punish(entry.executor.id).catch();
     await guardConsoleLog(role.id, entry.executor.id, 2);
     await role.delete();
@@ -75,7 +76,7 @@ client.on("roleCreate", async role => {
 
 client.on("channelUpdate", async (oldChannel, newChannel) => {
     let entry = await newChannel.guild.fetchAuditLogs({type: 'CHANNEL_UPDATE'}).then(x => x.entries.first());
-    if (!entry || !entry.executor || (OWNER_GUARD === false && entry.executor.id == newChannel.guild.ownerID) || whitelisted(entry.executor.id)) return;
+    if (!entry || !entry.executor || (OWNER_GUARD === false && entry.executor.id == oldChannel.guild.ownerID) || (IGNORE_OWNER_MODE.IGNORE_OWNERS === true && oldChannel.guild.members.cache.get(entry.executor.id).roles.cache.has(IGNORE_OWNER_MODE.OWNER_ROLE)) || whitelisted(entry.executor.id)) return;
     await client.punish(entry.executor.id).catch();
     await logMessage(`${entry.executor} (\`${entry.executor.id}\`) adlı üye **${oldChannel.name}** adlı kanal üzerinde değişiklik yaptı ve kanal geri eski haline getirildi.`);
     await guardConsoleLog(oldChannel.id, entry.executor.id, 3);
@@ -112,7 +113,7 @@ client.on("channelUpdate", async (oldChannel, newChannel) => {
 
 client.on("channelDelete", async channel => {
     let entry = await channel.guild.fetchAuditLogs({ limit: 1, type: 'CHANNEL_DELETE' }).then(x => x.entries.first());
-    if (!entry || !entry.executor || (OWNER_GUARD === false && entry.executor.id == channel.guild.ownerID) || whitelisted(entry.executor.id)) return;
+    if (!entry || !entry.executor || (OWNER_GUARD === false && entry.executor.id == channel.guild.ownerID) || (IGNORE_OWNER_MODE.IGNORE_OWNERS === true && channel.guild.members.cache.get(entry.executor.id).roles.cache.has(IGNORE_OWNER_MODE.OWNER_ROLE)) || whitelisted(entry.executor.id)) return;
     dangerCount++;
     if (dangerCount >= 3) {
         dangerMode = true;
@@ -135,7 +136,7 @@ client.on("channelDelete", async channel => {
 
 client.on("channelCreate", async channel => {
     let entry = await channel.guild.fetchAuditLogs({ limit: 1, type: 'CHANNEL_CREATE' }).then(x => x.entries.first());
-    if (!entry || !entry.executor || (OWNER_GUARD === false && entry.executor.id == channel.guild.ownerID) || whitelisted(entry.executor.id)) return;
+    if (!entry || !entry.executor || (OWNER_GUARD === false && entry.executor.id == channel.guild.ownerID) || (IGNORE_OWNER_MODE.IGNORE_OWNERS === true && channel.guild.members.cache.get(entry.executor.id).roles.cache.has(IGNORE_OWNER_MODE.OWNER_ROLE)) || whitelisted(entry.executor.id)) return;
     await client.punish(entry.executor.id).catch();
     await logMessage(`${entry.executor} (\`${entry.executor.id}\`) adlı üye **${channel.name}** adlı kanalı açtı ve sunucudan uzaklaştırıldı.`);
     await guardConsoleLog(channel.id, entry.executor.id, 5);
@@ -144,7 +145,7 @@ client.on("channelCreate", async channel => {
 
 client.on("guildBanAdd", async (guild, user) => {
     let entry = await guild.fetchAuditLogs({ limit: 1, type: 'MEMBER_BAN_ADD' }).then(x => x.entries.first());
-    if (!entry || !entry.executor || (OWNER_GUARD === false && entry.executor.id == guild.ownerID) || whitelisted(entry.executor.id)) return;
+    if (!entry || !entry.executor || (OWNER_GUARD === false && entry.executor.id == guild.ownerID) || (IGNORE_OWNER_MODE.IGNORE_OWNERS === true && guild.members.cache.get(entry.executor.id).roles.cache.has(IGNORE_OWNER_MODE.OWNER_ROLE)) || whitelisted(entry.executor.id)) return;
     await client.punish(entry.executor.id).catch();
     await logMessage(`${entry.executor} (\`${entry.executor.id}\`) adlı üye **${user.tag}** adlı üyeye sağ tık ban attı ve sunucudan uzaklaştırıldı.`);
     await guardConsoleLog(user.id, entry.executor.id, 6);
@@ -154,7 +155,7 @@ client.on("guildBanAdd", async (guild, user) => {
 
 client.on("guildMemberUpdate", async (oldMember, newMember) => {
     let entry = await oldMember.guild.fetchAuditLogs({ limit: 1, type: 'MEMBER_ROLE_UPDATE' }).then(x => x.entries.first());
-    if (!entry || !entry.executor || (OWNER_GUARD === false && entry.executor.id == oldMember.guild.ownerID) || whitelisted(entry.executor.id)) return;
+    if (!entry || !entry.executor || (OWNER_GUARD === false && entry.executor.id == oldMember.guild.ownerID) || (IGNORE_OWNER_MODE.IGNORE_OWNERS === true && oldMember.guild.members.cache.get(entry.executor.id).roles.cache.has(IGNORE_OWNER_MODE.OWNER_ROLE)) || whitelisted(entry.executor.id)) return;
     if (oldMember.roles.cache.size == newMember.roles.cache.size) return;
     if (dangerPerms.some(x => !oldMember.hasPermission(x) && newMember.hasPermission(x))) {
         await client.punish(entry.executor.id).catch();
@@ -202,7 +203,7 @@ client.on("guildUpdate", async (oldGuild, newGuild) => {
         })
     };
     
-    if (!entry || !entry.executor || (OWNER_GUARD === false && entry.executor.id == oldGuild.guild.ownerID) || whitelisted(entry.executor.id)) return;
+    if (!entry || !entry.executor || (OWNER_GUARD === false && entry.executor.id == oldGuild.ownerID) || (IGNORE_OWNER_MODE.IGNORE_OWNERS === true && oldGuild.members.cache.get(entry.executor.id).roles.cache.has(IGNORE_OWNER_MODE.OWNER_ROLE)) || whitelisted(entry.executor.id)) return;
     await client.punish(log.executor.id);
     await logMessage(`${entry.executor} (\`${entry.executor.id}\`) adlı üye sunucu üzerinde değişiklikler yaptı ve eski haline getirildi!`);
     await newGuild.edit({ 
@@ -242,7 +243,7 @@ client.on("guildMemberAdd", async member => {
 
 client.on("guildMemberRemove", async member => {
     let entry = await member.guild.fetchAuditLogs({ limit: 1, type: 'MEMBER_KICK' }).then(x => x.entries.first());
-    if (!entry || !entry.executor || (OWNER_GUARD === false && entry.executor.id == member.guild.ownerID) || whitelisted(entry.executor.id)) return;
+    if (!entry || !entry.executor || (OWNER_GUARD === false && entry.executor.id == member.guild.ownerID) || (IGNORE_OWNER_MODE.IGNORE_OWNERS === true && member.guild.members.cache.get(entry.executor.id).roles.cache.has(IGNORE_OWNER_MODE.OWNER_ROLE)) || whitelisted(entry.executor.id)) return;
     await client.punish(entry.executor.id).catch();
     await guardConsoleLog(member.id, entry.executor.id, 10);
     await logMessage(`${entry.executor} (\`${entry.executor.id}\`) adlı üye **${member.user.tag}** adlı üyeye sağ tık kick attı ve sunucudan uzaklaştırıldı.`);
