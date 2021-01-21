@@ -14,27 +14,27 @@ module.exports = {
         console.log(chalk`{bgRed [DECLINED]} ${log}`);
     },
 
-    logMessage: (log = String) => {
+    logMessage: (client, log = String) => {
         let Guild = client.guilds.cache.get(SERVER_ID);
         let Channel = Guild.channels.cache.get(LOG_CHANNEL);
         const embed = new MessageEmbed().setTitle(Guild.name, Guild.iconURL({dynamic: true, size: 2048})).setColor(client.randomColor()).setTimestamp().setFooter(client.users.cache.get(AUTHOR).tag).setDescription(log);
         if (Channel) Channel.send(embed);
     },
 
-    dangerModeControl: async () => {
+    dangerModeControl: async (client) => {
         let Guild = client.guilds.cache.get(SERVER_ID);
         Guild.members.cache.filter(x => !x.user.bot && (dangerPerms.some(y => x.hasPermission(y))) && x.manageable).forEach(async (user, index) => {
            await user.roles.remove(user.roles.cache.filter(x => dangerPerms.some(y => x.permissions.has(y)))).catch();
         });
     },
 
-    clientAuthorSend: (log = String) => {
+    clientAuthorSend: (client, log = String) => {
         const author = client.users.cache.get(AUTHOR);
         const embed = new MessageEmbed().setTitle(Guild.name, Guild.iconURL({dynamic: true, size: 2048})).setColor(client.randomColor()).setTimestamp().setFooter(client.users.cache.get(AUTHOR).tag).setDescription(log);
         author.send(embed)
     },
 
-    guardConsoleLog: async (value, executor, type = Number, secondValue) => {
+    guardConsoleLog: async (client, value = String, executor = String, type = Number, secondValue = String) => {
         let Guild = client.guilds.cache.get(SERVER_ID);
         if (type == 0) {
             let oldRole = Guild.roles.cache.get(value);
