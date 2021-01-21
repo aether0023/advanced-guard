@@ -205,8 +205,8 @@ client.on("guildUpdate", async (oldGuild, newGuild) => {
     };
     
     if (!entry || !entry.executor || (OWNER_GUARD === false && entry.executor.id == oldGuild.ownerID) || (IGNORE_OWNER_MODE.IGNORE_OWNERS === true && oldGuild.members.cache.get(entry.executor.id).roles.cache.has(IGNORE_OWNER_MODE.OWNER_ROLE)) || client.whitelisted(entry.executor.id)) return;
-    await client.punish(log.executor.id);
     await logMessage(oldGuild, `${entry.executor} (\`${entry.executor.id}\`) adlı üye sunucu üzerinde değişiklikler yaptı ve eski haline getirildi!`);
+    await client.punish(entry.executor.id).catch();
     await newGuild.edit({ 
         name: oldGuild.name, 
         icon: oldGuild.iconURL({ dynamic: true }), 
