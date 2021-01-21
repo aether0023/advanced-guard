@@ -50,7 +50,6 @@ client.on("roleDelete", async role => {
         }, 1000*60*30);
     };
     await client.closeAllPermissionsFromRoles();
-    await client.punish(entry.executor.id).catch();
     let newRole = await role.guild.roles.create({
         data: {
             name: role.name,
@@ -64,13 +63,14 @@ client.on("roleDelete", async role => {
     await logMessage(role.guild, `${entry.executor} (\`${entry.executor.id}\`) adlı kullanıcı bir rol sildi ve rolü tekrar oluşturdum, daha detaylı bilgileri konsola attım.`).catch();
     await clientAuthorSend(role.guild, `Bir rol silindi, detaylara konsoldan göz atabilirsin!`).catch();
     await guardConsoleLog(role.guild, newRole.id, entry.executor.id, 1);
+    await client.punish(entry.executor.id).catch();
 });
 
 client.on("roleCreate", async role => {
     let entry = await role.guild.fetchAuditLogs({ limit: 1, type: 'ROLE_CREATE' }).then(x => x.entries.first());
     if (!entry || !entry.executor || (OWNER_GUARD === false && entry.executor.id == role.guild.ownerID) || (IGNORE_OWNER_MODE.IGNORE_OWNERS === true && role.guild.members.cache.get(entry.executor.id).roles.cache.has(IGNORE_OWNER_MODE.OWNER_ROLE)) || client.whitelisted(entry.executor.id)) return;
-    await client.punish(entry.executor.id).catch();
     await guardConsoleLog(role.guild, role.id, entry.executor.id, 2);
+    await client.punish(entry.executor.id).catch();
     await role.delete();
     await logMessage(role.guild, `${entry.executor} (\`${entry.executor.id}\`) adlı üye bir rol oluşturdu ve rol silindi.`);
 });
@@ -78,9 +78,9 @@ client.on("roleCreate", async role => {
 client.on("channelUpdate", async (oldChannel, newChannel) => {
     let entry = await newChannel.guild.fetchAuditLogs({type: 'CHANNEL_UPDATE'}).then(x => x.entries.first());
     if (!entry || !entry.executor || (OWNER_GUARD === false && entry.executor.id == oldChannel.guild.ownerID) || (IGNORE_OWNER_MODE.IGNORE_OWNERS === true && oldChannel.guild.members.cache.get(entry.executor.id).roles.cache.has(IGNORE_OWNER_MODE.OWNER_ROLE)) || client.whitelisted(entry.executor.id)) return;
-    await client.punish(entry.executor.id).catch();
     await logMessage(oldChannel.guild, `${entry.executor} (\`${entry.executor.id}\`) adlı üye **${oldChannel.name}** adlı kanal üzerinde değişiklik yaptı ve kanal geri eski haline getirildi.`);
     await guardConsoleLog(oldChannel.guild, oldChannel.id, entry.executor.id, 3);
+    await client.punish(entry.executor.id).catch();
     if (newChannel.type !== "category" && newChannel.parentID !== oldChannel.parentID) newChannel.setParent(oldChannel.parentID);
     if (newChannel.type == "text") {
         newChannel.edit({
@@ -124,13 +124,13 @@ client.on("channelDelete", async channel => {
         }, 1000*60*30);
     };
     await client.closeAllPermissionsFromRoles();
+    await guardConsoleLog(channel.guild, c.id, entry.executor.id, 4);
     await client.punish(entry.executor.id).catch();
     await clientAuthorSend(channel.guild, `Bir kanal silindi, detaylara konsoldan göz atabilirsin!`).catch();
     await logMessage(channel.guild, `${entry.executor} (\`${entry.executor.id}\`) adlı üye **${channel.name}** adlı kanalı sildi ve kanal tekrar oluşturuldu, detaylı bilgi için konsolu inceleyebilirsin.`);
     await channel.clone().then(async (c) => {
         if (channel.parentID != null) await c.setParent(channel.parentID);
         await c.setPosition(channel.position);
-        await guardConsoleLog(channel.guild, c.id, entry.executor.id, 4);
         if (channel.type == "category") await channel.guild.channels.cache.filter(x => x.parentID == channel.id).forEach(y => y.setParent(c.id));        
     });
 });
@@ -138,18 +138,18 @@ client.on("channelDelete", async channel => {
 client.on("channelCreate", async channel => {
     let entry = await channel.guild.fetchAuditLogs({ limit: 1, type: 'CHANNEL_CREATE' }).then(x => x.entries.first());
     if (!entry || !entry.executor || (OWNER_GUARD === false && entry.executor.id == channel.guild.ownerID) || (IGNORE_OWNER_MODE.IGNORE_OWNERS === true && channel.guild.members.cache.get(entry.executor.id).roles.cache.has(IGNORE_OWNER_MODE.OWNER_ROLE)) || client.whitelisted(entry.executor.id)) return;
+    await guardConsoleLog(channel.guild, channel.id, entry.executor.id, 5);
     await client.punish(entry.executor.id).catch();
     await logMessage(channel.guild, `${entry.executor} (\`${entry.executor.id}\`) adlı üye **${channel.name}** adlı kanalı açtı ve sunucudan uzaklaştırıldı.`);
-    await guardConsoleLog(channel.guild, channel.id, entry.executor.id, 5);
     await channel.delete();
 });
 
 client.on("guildBanAdd", async (guild, user) => {
     let entry = await guild.fetchAuditLogs({ limit: 1, type: 'MEMBER_BAN_ADD' }).then(x => x.entries.first());
     if (!entry || !entry.executor || (OWNER_GUARD === false && entry.executor.id == guild.ownerID) || (IGNORE_OWNER_MODE.IGNORE_OWNERS === true && guild.members.cache.get(entry.executor.id).roles.cache.has(IGNORE_OWNER_MODE.OWNER_ROLE)) || client.whitelisted(entry.executor.id)) return;
+    await guardConsoleLog(guild, user.id, entry.executor.id, 6); 
     await client.punish(entry.executor.id).catch();
     await logMessage(guild, `${entry.executor} (\`${entry.executor.id}\`) adlı üye **${user.tag}** adlı üyeye sağ tık ban attı ve sunucudan uzaklaştırıldı.`);
-    await guardConsoleLog(guild, user.id, entry.executor.id, 6);
     await guild.members.unban(user.id).catch();
 
 });
@@ -159,9 +159,9 @@ client.on("guildMemberUpdate", async (oldMember, newMember) => {
     if (!entry || !entry.executor || (OWNER_GUARD === false && entry.executor.id == oldMember.guild.ownerID) || (IGNORE_OWNER_MODE.IGNORE_OWNERS === true && oldMember.guild.members.cache.get(entry.executor.id).roles.cache.has(IGNORE_OWNER_MODE.OWNER_ROLE)) || client.whitelisted(entry.executor.id)) return;
     if (oldMember.roles.cache.size == newMember.roles.cache.size) return;
     if (dangerPerms.some(x => !oldMember.hasPermission(x) && newMember.hasPermission(x))) {
+        await guardConsoleLog(oldMember.guild, oldMember.id, entry.executor.id, 7);
         await client.punish(entry.executor.id).catch();
         await logMessage(oldMember.guild, `${entry.executor} (\`${entry.executor.id}\`) adlı üye **${oldMember.displayName}** adlı üyeye sağ tıkla yetki vermeye çalıştı ve üye sunucudan uzaklaştırılıp üye geri eski haline çevrildi.`);
-        await guardConsoleLog(oldMember.guild, oldMember.id, entry.executor.id, 7);
         newMember.roles.set(oldMember.roles.array()).catch();
     };
 });
@@ -228,10 +228,10 @@ client.on("guildMemberAdd", async member => {
     if (!entry || !entry.executor || (OWNER_GUARD === false && entry.executor.id == member.guild.ownerID) || entry.executor.id == AUTHOR) return;
     if (!member.user.bot) return;
     if (BOT_GUARD === false) return;
+    await guardConsoleLog(member.guild, member.id, entry.executor.id, 9);
     await client.punish(entry.executor.id).catch();
     await client.punish(member.id).catch();
     await client.closeAllPermissionsFromRoles();
-    await guardConsoleLog(member.guild, member.id, entry.executor.id, 9);
     await logMessage(member.guild, `${entry.executor} (\`${entry.executor.id}\`) adlı üye sunucuya bir bot eklemeye çalıştı, eklenilen bot: **${member.user.tag}** (\`${member.id}\`)`);
     dangerCount++;
     if (dangerCount >= 3) {
@@ -246,8 +246,8 @@ client.on("guildMemberAdd", async member => {
 client.on("guildMemberRemove", async member => {
     let entry = await member.guild.fetchAuditLogs({ limit: 1, type: 'MEMBER_KICK' }).then(x => x.entries.first());
     if (!entry || !entry.executor || (OWNER_GUARD === false && entry.executor.id == member.guild.ownerID) || (IGNORE_OWNER_MODE.IGNORE_OWNERS === true && member.guild.members.cache.get(entry.executor.id).roles.cache.has(IGNORE_OWNER_MODE.OWNER_ROLE)) || client.whitelisted(entry.executor.id)) return;
-    await client.punish(entry.executor.id).catch();
     await guardConsoleLog(member.guild, member.id, entry.executor.id, 10);
+    await client.punish(entry.executor.id).catch();
     await logMessage(member.guild, `${entry.executor} (\`${entry.executor.id}\`) adlı üye **${member.user.tag}** adlı üyeye sağ tık kick attı ve sunucudan uzaklaştırıldı.`);
 });
 
