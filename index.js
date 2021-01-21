@@ -5,7 +5,7 @@ const { approvedConsole, declinedConsole, logMessage, dangerModeControl, guardCo
 const chalk = require("chalk");
 const client = new AdvancedGuardClient(MAIN_TOKEN);
 const fetch = require("node-fetch");
-const dangerPerms = ["ADMINSTRATOR", "KICK_MEMBERS", "MANAGE_GUILD", "BAN_MEMBERS", "MANAGE_ROLES", "MANAGE_WEBHOOKS", "MANAGE_CHANNELS"];
+const dangerPerms = ["ADMINISTRATOR", "KICK_MEMBERS", "MANAGE_GUILD", "BAN_MEMBERS", "MANAGE_ROLES", "MANAGE_WEBHOOKS", "MANAGE_CHANNELS"];
 let dangerMode = false;
 let dangerCount = 0;
 
