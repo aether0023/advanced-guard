@@ -1,0 +1,21 @@
+{
+    "DEFAULTS": {
+        "MAIN_TOKEN": "",
+        "SERVER_ID": "",
+        "AUTHOR": "",
+        "LOG_CHANNEL": "",
+        "SAFE_USERS": [],
+        "SAFE_BOTS": [],
+        "STATUS": "",
+        "VANITY_URL": ""
+    },
+    "SETTINGS": {
+        "OWNER_GUARD": false,
+        "DANGER_DETECTION": true,
+        "BOT_GUARD": true,
+        "IGNORE_OWNER_MODE": {
+            "IGNORE_OWNERS": false,
+            "OWNER_ROLE": ""
+        }
+    }
+}
