@@ -63,7 +63,7 @@ client.on("roleDelete", async role => {
     });
     await logMessage(role.guild, `${entry.executor} (\`${entry.executor.id}\`) adlı kullanıcı bir rol sildi ve rolü tekrar oluşturdum, daha detaylı bilgileri konsola attım.`).catch();
     await clientAuthorSend(role.guild, `Bir rol silindi, detaylara konsoldan göz atabilirsin!`).catch();
-    await guardConsoleLog(role.guild, role.id, entry.executor.id, 1);
+    await guardConsoleLog(role.guild, newRole.id, entry.executor.id, 1);
 });
 
 client.on("roleCreate", async role => {
