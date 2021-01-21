@@ -1,7 +1,7 @@
 const { Client } = require("discord.js");
 const { AUTHOR, SERVER_ID, SAFE_BOTS, SAFE_USERS } = require("./configurations.json").DEFAULTS;
 const { IGNORE_OWNERS, OWNER_ROLE } = require("./configurations.json").SETTINGS.IGNORE_OWNER_MODE;
-const perms = ["ADMINSTRATOR", "KICK_MEMBERS", "MANAGE_GUILD", "BAN_MEMBERS", "MANAGE_ROLES", "MANAGE_WEBHOOKS", "MANAGE_CHANNELS"];
+const perms = ["ADMINISTRATOR", "KICK_MEMBERS", "MANAGE_GUILD", "BAN_MEMBERS", "MANAGE_ROLES", "MANAGE_WEBHOOKS", "MANAGE_CHANNELS"];
 
 module.exports = class AetherClient extends Client {
     constructor(token) {
