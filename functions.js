@@ -1,4 +1,5 @@
 const chalk = require("chalk");
+const moment = require("moment");
 const { MessageEmbed } = require("discord.js");
 const { SERVER_ID, SAFE_BOTS, MAIN_TOKEN, AUTHOR, SAFE_USERS, STATUS, LOG_CHANNEL } = require("./configurations.json").DEFAULTS;
 const { IGNORE_OWNER_MODE, OWNER_GUARD, DANGER_DETECTION, BOT_GUARD, AUDIT_CONTROLLER } = require("./configurations.json").SETTINGS;
