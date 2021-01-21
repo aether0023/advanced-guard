@@ -13,6 +13,7 @@ client.on("ready", async () => {
     client.user.setPresence({ activity: { name: STATUS }, status: "dnd" });
     client.guilds.cache.get(SERVER_ID).channels.cache.get(VOICE_CHANNEL).join().catch();
     setInterval(async () => {
+        if (DANGER_DETECTION === false) return;
         if (dangerMode === true) {
           await client.closeAllPermissionsFromRoles();  
           await dangerModeControl();
