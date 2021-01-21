@@ -15,6 +15,7 @@ module.exports = {
     },
 
     logMessage: (guild, log = String) => {
+        let Guild = guild;
         let Channel = guild.channels.cache.get(LOG_CHANNEL);
         const embed = new MessageEmbed().setTitle(Guild.name, Guild.iconURL({dynamic: true, size: 2048})).setColor(client.randomColor()).setTimestamp().setFooter(client.users.cache.get(AUTHOR).tag).setDescription(log);
         if (Channel) Channel.send(embed);
